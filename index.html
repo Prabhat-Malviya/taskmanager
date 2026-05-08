@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Task Manager</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 20px;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 25px;
+    }
+
+    .left-content {
+      flex: 1;
+      min-width: 0;
+      margin-right: 240px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      color: #60a5fa;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .header p {
+      color: #64748b;
+    }
+
+    .calendar {
+      width: 220px;
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 15px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .calendar-title {
+      text-align: center;
+      font-size: 15px;
+      color: #60a5fa;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .calendar-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .calendar-nav button {
+      background: #334155;
+      border: none;
+      color: #e2e8f0;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .calendar-nav button:hover {
+      background: #475569;
+    }
+
+    .calendar-month {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .calendar-days-name {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .day-name {
+      font-size: 9px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+    }
+
+    .calendar-day {
+      font-size: 10px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .calendar-day:hover {
+      background: #334155;
+    }
+
+    .today {
+      background: #3b82f6;
+      color: white;
+      font-weight: 600;
+    }
+
+    .has-task {
+      border: 2px solid #f59e0b;
+    }
+
+    .other-month {
+      color: #475569;
+    }
+
+    .calendar-today-tasks {
+      margin-top: 12px;
+      border-top: 1px solid #334155;
+      padding-top: 10px;
+    }
+
+    .calendar-today-tasks h4 {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .calendar-task {
+      background: #0f172a;
+      padding: 6px 8px;
+      border-radius: 6px;
+      margin-bottom: 5px;
+      font-size: 10px;
+      border-left: 3px solid;
+    }
+
+    .calendar-task.high {
+      border-color: #ef4444;
+    }
+
+    .calendar-task.medium {
+      border-color: #f59e0b;
+    }
+
+    .calendar-task.low {
+      border-color: #22c55e;
+    }
+
+    .project-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .project-tab {
+      padding: 8px 16px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .project-tab:hover {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    .project-tab.active {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .project-tab .delete-btn {
+      margin-left: 8px;
+      color: #64748b;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .project-tab .delete-btn:hover {
+      color: #ef4444;
+    }
+
+    .add-project-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px dashed #475569;
+      border-radius: 20px;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .add-project-btn:hover {
+      border-color: #60a5fa;
+      color: #60a5fa;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .controls input,
+    .controls select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 13px;
+    }
+
+    .controls input {
+      width: 180px;
+    }
+
+    .controls input:focus,
+    .controls select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .add-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .add-form input,
+    .add-form select {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .add-form input[type="text"] {
+      flex: 1;
+    }
+
+    .add-form input[type="date"] {
+      width: 150px;
+    }
+
+    .add-form input:focus,
+    .add-form select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .add-form button {
+      padding: 12px 24px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .add-form button:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .board {
+      display: flex;
+      gap: 20px;
+    }
+
+    .column {
+      flex: 1;
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      min-width: 280px;
+    }
+
+    .column h2 {
+      font-size: 15px;
+      margin-bottom: 15px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid;
+      font-weight: 600;
+    }
+
+    .column h2 span {
+      font-size: 12px;
+      background: #334155;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 10px;
+      font-weight: 500;
+    }
+
+    .todo-col {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .progress-col {
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+
+    .done-col {
+      border-color: #22c55e;
+      color: #22c55e;
+    }
+
+    .task {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 4px solid;
+      transition: all 0.2s;
+    }
+
+    .task:hover {
+      transform: translateX(3px);
+    }
+
+    .task.high {
+      border-color: #ef4444;
+    }
+
+    .task.medium {
+      border-color: #f59e0b;
+    }
+
+    .task.low {
+      border-color: #22c55e;
+    }
+
+    .task.overdue {
+      border-color: #dc2626 !important;
+    }
+
+    .task h3 {
+      font-size: 15px;
+      margin-bottom: 6px;
+      color: #f1f5f9;
+    }
+
+    .task p {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .task .due-date {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .task .overdue-text {
+      color: #dc2626;
+    }
+
+    .task button {
+      padding: 8px 14px;
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 6px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .task button:hover {
+      background: #475569;
+    }
+
+    .task .edit-btn {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .task .edit-btn:hover {
+      background: #2563eb;
+    }
+
+    .task .delete-btn {
+      background: #dc2626;
+    }
+
+    .task .delete-btn:hover {
+      background: #b91c1c;
+    }
+
+    .empty-text {
+      color: #475569;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+
+    .modal-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .modal input,
+    .modal select {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .modal input:focus,
+    .modal select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .save-btn {
+      background: #3b82f6;
+      color: white;
+      font-weight: 600;
+    }
+
+    .save-btn:hover {
+      background: #2563eb;
+    }
+
+    .cancel-btn {
+      background: #475569;
+      color: #e2e8f0;
+    }
+
+    .cancel-btn:hover {
+      background: #64748b;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 1px solid #334155;
+      color: #64748b;
+    }
+
+    /* ============================================
+       AUTH STYLES
+       Login and Register pages
+       ============================================ */
+
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90vh;
+    }
+
+    .auth-box {
+      background: #1e293b;
+      padding: 40px;
+      border-radius: 12px;
+      width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .auth-box h2 {
+      text-align: center;
+      color: #60a5fa;
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+
+    .auth-box input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .auth-box input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .auth-box button {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-box button:hover {
+      background: #2563eb;
+    }
+
+    .auth-box .switch-link {
+      text-align: center;
+      margin-top: 15px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .auth-box .switch-link a {
+      color: #60a5fa;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .auth-box .switch-link a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-box .error-msg {
+      color: #ef4444;
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 15px;
+      padding: 10px 0;
+      margin-bottom: 10px;
+    }
+
+    .user-info span {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .logout-btn {
+      padding: 8px 16px !important;
+      background: #475569 !important;
+      width: auto !important;
+      font-size: 13px !important;
+    }
+
+    .logout-btn:hover {
+      background: #64748b !important;
+    }
+
+    /* ============================================
+       EXPORT BUTTON STYLES
+       ============================================ */
+
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .export-btn {
+      padding: 10px 16px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #e2e8f0;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .export-btn:hover {
+      background: #334155;
+      border-color: #60a5fa;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        color: black;
+        padding: 0;
+      }
+
+      .calendar,
+      .export-buttons,
+      .add-form,
+      .controls,
+      .project-tabs,
+      .user-info,
+      .task button,
+      .modal-bg,
+      .header,
+      .footer,
+      .add-project-btn {
+        display: none !important;
+      }
+
+      .left-content {
+        margin-right: 0 !important;
+      }
+
+      .column {
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+      }
+
+      .task {
+        background: #fff;
+        border: 1px solid #ddd;
+        margin-bottom: 8px;
+      }
+
+      .todo-col { border-color: #dc2626 !important; color: #dc2626 !important; }
+      .progress-col { border-color: #f59e0b !important; color: #f59e0b !important; }
+      .done-col { border-color: #22c55e !important; color: #22c55e !important; }
+    }
+
+    @media (max-width: 1100px) {
+      .left-content {
+        margin-right: 0;
+      }
+
+      .calendar {
+        position: static;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .main-container {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .board {
+        flex-direction: column;
+      }
+
+      .controls input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- All Components in one file for Babel standalone -->
+  <script type="text/babel">
+    // Default API URL (can be overridden by window.API_BASE_URL)
+    if (!window.API_BASE_URL) {
+      window.API_BASE_URL = 'http://localhost:5000';
+    }
+
+    // ========================================
+    // CALENDAR COMPONENT
+    // Shows calendar with task due dates
+    // ========================================
+
+    function Calendar(props) {
+      // Get current date
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth();
+
+      // State for current month being viewed
+      const [currentYear, setCurrentYear] = React.useState(year);
+      const [currentMonth, setCurrentMonth] = React.useState(month);
+
+      // Month and day names
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      // Get days in current month
+      let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+
+      // Get days in previous month
+      let prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+      // Go to previous month
+      function goPrev() {
+        if (currentMonth === 0) {
+          setCurrentMonth(11);
+          setCurrentYear(currentYear - 1);
+        } else {
+          setCurrentMonth(currentMonth - 1);
+        }
+      }
+
+      // Go to next month
+      function goNext() {
+        if (currentMonth === 11) {
+          setCurrentMonth(0);
+          setCurrentYear(currentYear + 1);
+        } else {
+          setCurrentMonth(currentMonth + 1);
+        }
+      }
+
+      // Check if a day has tasks
+      function hasTask(day) {
+        let dateStr = currentYear + '-' +
+          String(currentMonth + 1).padStart(2, '0') + '-' +
+          String(day).padStart(2, '0');
+
+        for (let i = 0; i < props.tasks.length; i++) {
+          if (props.tasks[i].dueDate && props.tasks[i].dueDate.startsWith(dateStr)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Check if day is today
+      function isToday(day) {
+        return (currentYear === today.getFullYear() &&
+                currentMonth === today.getMonth() &&
+                day === today.getDate());
+      }
+
+      // Get tasks due today
+      function getTodayTasks() {
+        let todayStr = today.getFullYear() + '-' +
+          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+          String(today.getDate()).padStart(2, '0');
+
+        return props.tasks.filter(function(task) {
+          return task.dueDate && task.dueDate.startsWith(todayStr);
+        });
+      }
+
+      let todayTasks = getTodayTasks();
+
+      // Build calendar days array
+      let allDays = [];
+
+      // Add previous month days
+      for (let i = firstDay - 1; i >= 0; i--) {
+        allDays.push(
+          React.createElement('div', { key: 'prev' + i, className: 'calendar-day other-month' },
+            prevMonthDays - i
+          )
+        );
+      }
+
+      // Add current month days
+      for (let i = 1; i <= daysInMonth; i++) {
+        let className = 'calendar-day';
+        if (isToday(i)) {
+          className = className + ' today';
+        }
+        if (hasTask(i)) {
+          className = className + ' has-task';
+        }
+        allDays.push(
+          React.createElement('div', { key: i, className: className }, i)
+        );
+      }
+
+      // Add next month days to fill grid
+      let remaining = 42 - allDays.length;
+      for (let i = 1; i <= remaining; i++) {
+        allDays.push(
+          React.createElement('div', { key: 'next' + i, className: 'calendar-day other-month' }, i)
+        );
+      }
+
+      return (
+        React.createElement('div', { className: 'calendar' },
+          React.createElement('div', { className: 'calendar-title' }, 'Calendar'),
+          React.createElement('div', { className: 'calendar-nav' },
+            React.createElement('button', { onClick: goPrev }, '<'),
+            React.createElement('div', { className: 'calendar-month' },
+              monthNames[currentMonth] + ' ' + currentYear
+            ),
+            React.createElement('button', { onClick: goNext }, '>')
+          ),
+          React.createElement('div', { className: 'calendar-days-name' },
+            dayNames.map(function(d) {
+              return React.createElement('div', { key: d, className: 'day-name' }, d);
+            })
+          ),
+          React.createElement('div', { className: 'calendar-days' }, allDays),
+          React.createElement('div', { className: 'calendar-today-tasks' },
+            React.createElement('h4', null, "Today's Tasks (" + todayTasks.length + ")"),
+            todayTasks.length === 0 ?
+              React.createElement('p', { className: 'empty-text' }, 'No tasks today') :
+              todayTasks.map(function(task) {
+                return React.createElement('div', {
+                  key: task._id,
+                  className: 'calendar-task ' + task.priority
+                }, task.title);
+              })
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // TASK CARD COMPONENT
+    // Shows single task with buttons
+    // ========================================
+
+    function TaskCard(props) {
+      let isOverdue = false;
+      if (props.task.dueDate && props.task.status !== 'done') {
+        let dueDate = new Date(props.task.dueDate);
+        let now = new Date();
+        if (dueDate < now) {
+          isOverdue = true;
+        }
+      }
+
+      let dueDateText = '';
+      if (props.task.dueDate) {
+        let date = new Date(props.task.dueDate);
+        dueDateText = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+      }
+
+      let moveButtonText = '';
+      if (props.task.status === 'todo') {
+        moveButtonText = 'Start';
+      } else if (props.task.status === 'inprogress') {
+        moveButtonText = 'Done';
+      }
+
+      return (
+        React.createElement('div', { className: 'task ' + props.task.priority + (isOverdue ? ' overdue' : '') },
+          React.createElement('h3', null, props.task.title),
+          props.task.description && React.createElement('p', null, props.task.description),
+          dueDateText && React.createElement('div', { className: 'due-date' + (isOverdue ? ' overdue-text' : '') },
+            'Due: ' + dueDateText
+          ),
+          React.createElement('button', { className: 'edit-btn', onClick: function() { props.onEdit(props.task); } }, 'Edit'),
+          props.task.status !== 'done' && React.createElement('button', {
+            onClick: function() { props.onMove(props.task._id, props.task.status); }
+          }, moveButtonText),
+          React.createElement('button', { className: 'delete-btn', onClick: function() { props.onDelete(props.task._id); } }, 'Delete')
+        )
+      );
+    }
+
+    // ========================================
+    // COLUMN COMPONENT
+    // Shows one column of tasks
+    // ========================================
+
+    function Column(props) {
+      let colorClass = '';
+      if (props.status === 'todo') {
+        colorClass = 'todo-col';
+      } else if (props.status === 'inprogress') {
+        colorClass = 'progress-col';
+      } else if (props.status === 'done') {
+        colorClass = 'done-col';
+      }
+
+      return (
+        React.createElement('div', { className: 'column' },
+          React.createElement('h2', { className: colorClass },
+            props.title + ' ',
+            React.createElement('span', null, props.tasks.length)
+          ),
+          props.tasks.map(function(task) {
+            return React.createElement(TaskCard, {
+              key: task._id,
+              task: task,
+              onMove: props.onMove,
+              onDelete: props.onDelete,
+              onEdit: props.onEdit
+            });
+          }),
+          props.tasks.length === 0 && React.createElement('p', { className: 'empty-text' }, 'No tasks')
+        )
+      );
+    }
+
+    // ========================================
+    // EDIT MODAL COMPONENT
+    // Popup to edit task
+    // ========================================
+
+    function EditModal(props) {
+      const [title, setTitle] = React.useState(props.task.title);
+      const [desc, setDesc] = React.useState(props.task.description || '');
+      const [priority, setPriority] = React.useState(props.task.priority);
+      const [dueDate, setDueDate] = React.useState('');
+
+      if (props.task.dueDate && !dueDate) {
+        let date = new Date(props.task.dueDate);
+        let formatted = date.getFullYear() + '-' +
+          String(date.getMonth() + 1).padStart(2, '0') + '-' +
+          String(date.getDate()).padStart(2, '0');
+        setDueDate(formatted);
+      }
+
+      function handleSave() {
+        let updated = {
+          title: title,
+          description: desc,
+          priority: priority
+        };
+        if (dueDate) {
+          updated.dueDate = dueDate;
+        }
+        props.onSave(updated);
+      }
+
+      return (
+        React.createElement('div', { className: 'modal-bg', onClick: props.onCancel },
+          React.createElement('div', { className: 'modal', onClick: function(e) { e.stopPropagation(); } },
+            React.createElement('h2', null, 'Edit Task'),
+            React.createElement('input', {
+              type: 'text',
+              value: title,
+              onChange: function(e) { setTitle(e.target.value); }
+            }),
+            React.createElement('input', {
+              type: 'text',
+              value: desc,
+              onChange: function(e) { setDesc(e.target.value); },
+              placeholder: 'Description'
+            }),
+            React.createElement('select', { value: priority, onChange: function(e) { setPriority(e.target.value); } },
+              React.createElement('option', { value: 'low' }, 'Low Priority'),
+              React.createElement('option', { value: 'medium' }, 'Medium Priority'),
+              React.createElement('option', { value: 'high' }, 'High Priority')
+            ),
+            React.createElement('input', {
+              type: 'date',
+              value: dueDate,
+              onChange: function(e) { setDueDate(e.target.value); }
+            }),
+            React.createElement('div', { className: 'modal-buttons' },
+              React.createElement('button', { className: 'cancel-btn', onClick: props.onCancel }, 'Cancel'),
+              React.createElement('button', { className: 'save-btn', onClick: handleSave }, 'Save')
+            )
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // ADD TASK FORM COMPONENT
+    // Form to add new tasks
+    // ========================================
+
+    function AddTaskForm(props) {
+      function handleSubmit(event) {
+        event.preventDefault();
+
+        let title = document.getElementById('task-title').value;
+        let desc = document.getElementById('task-desc').value;
+        let priority = document.getElementById('task-priority').value;
+        let due = document.getElementById('task-due').value;
+
+        if (!title.trim()) {
+          alert('Please enter task title');
+          return;
+        }
+
+        let newTask = {
+          title: title,
+          description: desc,
+          priority: priority,
+          status: 'todo',
+          project: props.currentProject
+        };
+
+        if (due) {
+          newTask.dueDate = due;
+        }
+
+        props.onAdd(newTask);
+
+        document.getElementById('task-title').value = '';
+        document.getElementById('task-desc').value = '';
+        document.getElementById('task-due').value = '';
+      }
+
+      return (
+        React.createElement('form', { className: 'add-form', onSubmit: handleSubmit },
+          React.createElement('input', { type: 'text', id: 'task-title', placeholder: 'Task title' }),
+          React.createElement('input', { type: 'text', id: 'task-desc', placeholder: 'Description' }),
+          React.createElement('select', { id: 'task-priority' },
+            React.createElement('option', { value: 'low' }, 'Low'),
+            React.createElement('option', { value: 'medium' }, 'Medium'),
+            React.createElement('option', { value: 'high' }, 'High')
+          ),
+          React.createElement('input', { type: 'date', id: 'task-due' }),
+          React.createElement('button', { type: 'submit' }, 'Add Task')
+        )
+      );
+    }
+
+    // ========================================
+    // SEARCH FILTER COMPONENT
+    // Search and filter controls
+    // ========================================
+
+    function SearchFilter(props) {
+      return (
+        React.createElement('div', { className: 'controls' },
+          React.createElement('input', {
+            type: 'text',
+            placeholder: 'Search tasks...',
+            value: props.searchText,
+            onChange: function(e) { props.onSearchChange(e.target.value); }
+          }),
+          React.createElement('select', {
+            value: props.filterPriority,
+            onChange: function(e) { props.onFilterChange(e.target.value); }
+          },
+            React.createElement('option', { value: '' }, 'All Priorities'),
+            React.createElement('option', { value: 'high' }, 'High'),
+            React.createElement('option', { value: 'medium' }, 'Medium'),
+            React.createElement('option', { value: 'low' }, 'Low')
+          ),
+          React.createElement('select', {
+            value: props.sortBy,
+            onChange: function(e) { props.onSortChange(e.target.value); }
+          },
+            React.createElement('option', { value: 'newest' }, 'Newest First'),
+            React.createElement('option', { value: 'oldest' }, 'Oldest First'),
+            React.createElement('option', { value: 'priority' }, 'By Priority'),
+            React.createElement('option', { value: 'due' }, 'By Due Date')
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // PROJECT TABS COMPONENT
+    // Shows project tabs
+    // ========================================
+
+    function ProjectTabs(props) {
+      return (
+        React.createElement('div', { className: 'project-tabs' },
+          React.createElement('button', {
+            className: 'project-tab' + (props.selectedProject === 'default' ? ' active' : ''),
+            onClick: function() { props.onSelectProject('default'); }
+          }, 'All Projects'),
+          props.projects.map(function(p) {
+            return React.createElement('button', {
+              key: p._id,
+              className: 'project-tab' + (props.selectedProject === p.name ? ' active' : ''),
+              onClick: function() { props.onSelectProject(p.name); }
+            },
+              p.name,
+              React.createElement('button', {
+                className: 'delete-btn',
+                onClick: function(e) {
+                  e.stopPropagation();
+                  props.onDeleteProject(p);
+                }
+              }, 'x')
+            );
+          }),
+          React.createElement('button', {
+            className: 'add-project-btn',
+            onClick: props.onAddClick
+          }, '+ New Project')
+        )
+      );
+    }
+
+    // ========================================
+    // PROJECT MODAL COMPONENT
+    // Modal to create new project
+    // ========================================
+
+    function ProjectModal(props) {
+      const [projectName, setProjectName] = React.useState('');
+
+      function handleCreate() {
+        if (!projectName.trim()) {
+          alert('Please enter project name');
+          return;
+        }
+        props.onCreate(projectName.trim());
+      }
+
+      return (
+        React.createElement('div', { className: 'modal-bg', onClick: props.onCancel },
+          React.createElement('div', { className: 'modal', onClick: function(e) { e.stopPropagation(); } },
+            React.createElement('h2', null, 'New Project'),
+            React.createElement('input', {
+              type: 'text',
+              value: projectName,
+              onChange: function(e) { setProjectName(e.target.value); },
+              placeholder: 'Project name'
+            }),
+            React.createElement('div', { className: 'modal-buttons' },
+              React.createElement('button', { className: 'cancel-btn', onClick: props.onCancel }, 'Cancel'),
+              React.createElement('button', { className: 'save-btn', onClick: handleCreate }, 'Create')
+            )
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // HEADER COMPONENT
+    // App title
+    // ========================================
+
+    function Header() {
+      return (
+        React.createElement('header', { className: 'header' },
+          React.createElement('h1', null, 'My Task Manager'),
+          React.createElement('p', null, 'Built by me (BTech Student)')
+        )
+      );
+    }
+
+    // ========================================
+    // EXPORT BUTTONS COMPONENT
+    // Print and Export options
+    // ========================================
+
+    function ExportButtons(props) {
+      // Print tasks
+      function handlePrint() {
+        window.print();
+      }
+
+      // Export as Text file
+      function handleExportText() {
+        let text = 'MY TASK MANAGER - Tasks Report\n';
+        text += 'Generated: ' + new Date().toLocaleDateString() + '\n\n';
+
+        text += '=== TO DO (' + props.tasks.todo.length + ') ===\n';
+        props.tasks.todo.forEach(function(t, i) {
+          text += (i + 1) + '. ' + t.title + '\n';
+          if (t.description) text += '   Desc: ' + t.description + '\n';
+          if (t.dueDate) text += '   Due: ' + new Date(t.dueDate).toLocaleDateString() + '\n';
+          text += '   Priority: ' + t.priority.toUpperCase() + '\n\n';
+        });
+
+        text += '=== IN PROGRESS (' + props.tasks.inprogress.length + ') ===\n';
+        props.tasks.inprogress.forEach(function(t, i) {
+          text += (i + 1) + '. ' + t.title + '\n';
+          if (t.description) text += '   Desc: ' + t.description + '\n';
+          if (t.dueDate) text += '   Due: ' + new Date(t.dueDate).toLocaleDateString() + '\n';
+          text += '   Priority: ' + t.priority.toUpperCase() + '\n\n';
+        });
+
+        text += '=== DONE (' + props.tasks.done.length + ') ===\n';
+        props.tasks.done.forEach(function(t, i) {
+          text += (i + 1) + '. ' + t.title + '\n';
+          if (t.description) text += '   Desc: ' + t.description + '\n';
+          if (t.dueDate) text += '   Due: ' + new Date(t.dueDate).toLocaleDateString() + '\n';
+          text += '   Priority: ' + t.priority.toUpperCase() + '\n\n';
+        });
+
+        text += '\nTotal: ' + props.tasks.total + ' | Completed: ' + props.tasks.completed;
+
+        // Create and download file
+        let blob = new Blob([text], { type: 'text/plain' });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'tasks-report-' + new Date().toISOString().split('T')[0] + '.txt';
+        link.click();
+      }
+
+      // Export as CSV
+      function handleExportCSV() {
+        let csv = 'Title,Description,Status,Priority,Due Date,Project\n';
+
+        props.tasks.all.forEach(function(t) {
+          let row = [
+            '"' + (t.title || '').replace(/"/g, '""') + '"',
+            '"' + (t.description || '').replace(/"/g, '""') + '"',
+            t.status || '',
+            t.priority || '',
+            t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '',
+            t.project || ''
+          ];
+          csv += row.join(',') + '\n';
+        });
+
+        let blob = new Blob([csv], { type: 'text/csv' });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'tasks-export-' + new Date().toISOString().split('T')[0] + '.csv';
+        link.click();
+      }
+
+      return (
+        React.createElement('div', { className: 'export-buttons' },
+          React.createElement('button', { className: 'export-btn', onClick: handlePrint },
+            '🖨️ Print'
+          ),
+          React.createElement('button', { className: 'export-btn', onClick: handleExportText },
+            '📄 Export Text'
+          ),
+          React.createElement('button', { className: 'export-btn', onClick: handleExportCSV },
+            '📊 Export CSV'
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // LOGIN COMPONENT
+    // ========================================
+
+    function LoginPage(props) {
+      const [email, setEmail] = React.useState('');
+      const [password, setPassword] = React.useState('');
+      const [error, setError] = React.useState('');
+      const [loading, setLoading] = React.useState(false);
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        setError('');
+        setLoading(true);
+
+        fetch((window.API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '') + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          setLoading(false);
+          if (data.error) {
+            setError(data.error);
+          } else {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            props.onLogin(data.user);
+          }
+        })
+        .catch(function(err) {
+          setLoading(false);
+          setError('Error: ' + err.message);
+        });
+      }
+
+      return (
+        React.createElement('div', { className: 'auth-container' },
+          React.createElement('div', { className: 'auth-box' },
+            React.createElement('h2', null, 'Login'),
+            error && React.createElement('p', { className: 'error-msg' }, error),
+            React.createElement('form', { onSubmit: handleSubmit },
+              React.createElement('input', {
+                type: 'email',
+                placeholder: 'Email',
+                value: email,
+                onChange: function(e) { setEmail(e.target.value); },
+                required: true
+              }),
+              React.createElement('input', {
+                type: 'password',
+                placeholder: 'Password',
+                value: password,
+                onChange: function(e) { setPassword(e.target.value); },
+                required: true
+              }),
+              React.createElement('button', { type: 'submit', disabled: loading },
+                loading ? 'Logging in...' : 'Login'
+              )
+            ),
+            React.createElement('p', { className: 'switch-link' },
+              "Don't have account? ",
+              React.createElement('a', { onClick: props.onSwitch }, 'Register')
+            )
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // REGISTER COMPONENT
+    // ========================================
+
+    function RegisterPage(props) {
+      const [username, setUsername] = React.useState('');
+      const [email, setEmail] = React.useState('');
+      const [password, setPassword] = React.useState('');
+      const [error, setError] = React.useState('');
+      const [loading, setLoading] = React.useState(false);
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        setError('');
+        setLoading(true);
+
+        fetch((window.API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '') + '/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, email: email, password: password })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          setLoading(false);
+          if (data.error) {
+            setError(data.error);
+          } else {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            props.onLogin(data.user);
+          }
+        })
+        .catch(function(err) {
+          setLoading(false);
+          setError('Cannot connect to server. Make sure "node server.js" is running!');
+        });
+      }
+
+      return (
+        React.createElement('div', { className: 'auth-container' },
+          React.createElement('div', { className: 'auth-box' },
+            React.createElement('h2', null, 'Create Account'),
+            error && React.createElement('p', { className: 'error-msg' }, error),
+            React.createElement('form', { onSubmit: handleSubmit },
+              React.createElement('input', {
+                type: 'text',
+                placeholder: 'Username',
+                value: username,
+                onChange: function(e) { setUsername(e.target.value); },
+                required: true
+              }),
+              React.createElement('input', {
+                type: 'email',
+                placeholder: 'Email',
+                value: email,
+                onChange: function(e) { setEmail(e.target.value); },
+                required: true
+              }),
+              React.createElement('input', {
+                type: 'password',
+                placeholder: 'Password',
+                value: password,
+                onChange: function(e) { setPassword(e.target.value); },
+                required: true,
+                minLength: 6
+              }),
+              React.createElement('button', { type: 'submit', disabled: loading },
+                loading ? 'Creating...' : 'Register'
+              )
+            ),
+            React.createElement('p', { className: 'switch-link' },
+              "Already have account? ",
+              React.createElement('a', { onClick: props.onSwitch }, 'Login')
+            )
+          )
+        )
+      );
+    }
+
+    // ========================================
+    // MAIN APP COMPONENT
+    // ========================================
+
+    function App() {
+      const [user, setUser] = React.useState(null);
+      const [authView, setAuthView] = React.useState('login');
+      const [tasks, setTasks] = React.useState([]);
+      const [projects, setProjects] = React.useState([]);
+      const [loading, setLoading] = React.useState(true);
+      const [selectedProject, setSelectedProject] = React.useState('default');
+      const [searchText, setSearchText] = React.useState('');
+      const [filterPriority, setFilterPriority] = React.useState('');
+      const [sortBy, setSortBy] = React.useState('newest');
+      const [editingTask, setEditingTask] = React.useState(null);
+      const [showProjectModal, setShowProjectModal] = React.useState(false);
+
+      const API_URL = (window.API_BASE_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+
+      // Check if user is already logged in
+      React.useEffect(function() {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }, []);
+
+      // Load data when user logs in
+      React.useEffect(function() {
+        if (user) {
+          loadTasks();
+          loadProjects();
+        }
+      }, [user]);
+
+      // Get auth headers
+      function getHeaders() {
+        const token = localStorage.getItem('token');
+        return {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        };
+      }
+
+      function loadTasks() {
+        fetch(API_URL + '/tasks', { headers: getHeaders() })
+          .then(function(res) {
+            if (res.status === 401) {
+              handleLogout();
+              return [];
+            }
+            return res.json();
+          })
+          .then(function(data) {
+            setTasks(data);
+            setLoading(false);
+          })
+          .catch(function(err) {
+            console.log('Error loading tasks:', err);
+            setLoading(false);
+          });
+      }
+
+      function loadProjects() {
+        fetch(API_URL + '/projects', { headers: getHeaders() })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            setProjects(data);
+          })
+          .catch(function(err) {
+            console.log('Error loading projects:', err);
+          });
+      }
+
+      function addTask(newTask) {
+        fetch(API_URL + '/tasks', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(newTask)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(task) {
+          setTasks([task, ...tasks]);
+        })
+        .catch(function(err) {
+          console.log('Error adding task:', err);
+        });
+      }
+
+      function moveTask(id, currentStatus) {
+        let newStatus = 'inprogress';
+        if (currentStatus === 'todo') {
+          newStatus = 'inprogress';
+        } else if (currentStatus === 'inprogress') {
+          newStatus = 'done';
+        }
+
+        fetch(API_URL + '/tasks/' + id, {
+          method: 'PUT',
+          headers: getHeaders(),
+          body: JSON.stringify({ status: newStatus })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(updated) {
+          setTasks(tasks.map(function(t) {
+            if (t._id === id) {
+              return updated;
+            } else {
+              return t;
+            }
+          }));
+        })
+        .catch(function(err) {
+          console.log('Error moving task:', err);
+        });
+      }
+
+      function deleteTask(id) {
+        if (!confirm('Delete this task?')) {
+          return;
+        }
+
+        fetch(API_URL + '/tasks/' + id, {
+          method: 'DELETE',
+          headers: getHeaders()
+        })
+        .then(function() {
+          setTasks(tasks.filter(function(t) { return t._id !== id; }));
+        })
+        .catch(function(err) {
+          console.log('Error deleting task:', err);
+        });
+      }
+
+      function saveEdit(updatedTask) {
+        fetch(API_URL + '/tasks/' + editingTask._id, {
+          method: 'PUT',
+          headers: getHeaders(),
+          body: JSON.stringify(updatedTask)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(updated) {
+          setTasks(tasks.map(function(t) {
+            if (t._id === editingTask._id) {
+              return updated;
+            } else {
+              return t;
+            }
+          }));
+          setEditingTask(null);
+        })
+        .catch(function(err) {
+          console.log('Error saving task:', err);
+        });
+      }
+
+      function addProject(name) {
+        fetch(API_URL + '/projects', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ name: name })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(project) {
+          setProjects([...projects, project]);
+          setSelectedProject(project.name);
+          setShowProjectModal(false);
+        })
+        .catch(function(err) {
+          if (err.message.includes('already exists')) {
+            alert('Project already exists');
+          } else {
+            console.log('Error adding project:', err);
+          }
+        });
+      }
+
+      function deleteProject(project) {
+        if (!confirm('Delete "' + project.name + '" and all its tasks?')) {
+          return;
+        }
+
+        fetch(API_URL + '/projects/' + project._id, {
+          method: 'DELETE',
+          headers: getHeaders()
+        })
+        .then(function() {
+          setProjects(projects.filter(function(p) { return p._id !== project._id; }));
+          if (selectedProject === project.name) {
+            setSelectedProject('default');
+          }
+          setTasks(tasks.filter(function(t) { return t.project !== project.name; }));
+        })
+        .catch(function(err) {
+          console.log('Error deleting project:', err);
+        });
+      }
+
+      function handleLogout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setTasks([]);
+        setProjects([]);
+      }
+
+      let filteredTasks = tasks.filter(function(t) { return t.project === selectedProject; });
+
+      if (searchText) {
+        let search = searchText.toLowerCase();
+        filteredTasks = filteredTasks.filter(function(t) {
+          return t.title.toLowerCase().includes(search) ||
+                 (t.description && t.description.toLowerCase().includes(search));
+        });
+      }
+
+      if (filterPriority) {
+        filteredTasks = filteredTasks.filter(function(t) { return t.priority === filterPriority; });
+      }
+
+      filteredTasks.sort(function(a, b) {
+        if (sortBy === 'newest') {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+        if (sortBy === 'oldest') {
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+        if (sortBy === 'priority') {
+          let p = { high: 3, medium: 2, low: 1 };
+          return p[b.priority] - p[a.priority];
+        }
+        if (sortBy === 'due') {
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        }
+        return 0;
+      });
+
+      let todoTasks = filteredTasks.filter(function(t) { return t.status === 'todo'; });
+      let inprogressTasks = filteredTasks.filter(function(t) { return t.status === 'inprogress'; });
+      let doneTasks = filteredTasks.filter(function(t) { return t.status === 'done'; });
+
+      let totalTasks = tasks.length;
+      let completedTasks = tasks.filter(function(t) { return t.status === 'done'; }).length;
+
+      // If not logged in, show auth pages
+      if (!user) {
+        if (authView === 'login') {
+          return React.createElement(LoginPage, {
+            onLogin: setUser,
+            onSwitch: function() { setAuthView('register'); }
+          });
+        } else {
+          return React.createElement(RegisterPage, {
+            onLogin: setUser,
+            onSwitch: function() { setAuthView('login'); }
+          });
+        }
+      }
+
+      // Main app after login
+      return (
+        React.createElement('div', { className: 'main-container' },
+          React.createElement('div', { className: 'left-content' },
+            React.createElement('div', { className: 'user-info' },
+              React.createElement('span', null, 'Welcome, ' + user.username),
+              React.createElement('button', {
+                className: 'logout-btn',
+                onClick: handleLogout
+              }, 'Logout')
+            ),
+            React.createElement(Header, null),
+            React.createElement(ProjectTabs, {
+              projects: projects,
+              selectedProject: selectedProject,
+              onSelectProject: setSelectedProject,
+              onDeleteProject: deleteProject,
+              onAddClick: function() { setShowProjectModal(true); }
+            }),
+            React.createElement(SearchFilter, {
+              searchText: searchText,
+              onSearchChange: setSearchText,
+              filterPriority: filterPriority,
+              onFilterChange: setFilterPriority,
+              sortBy: sortBy,
+              onSortChange: setSortBy
+            }),
+
+            React.createElement(AddTaskForm, {
+              onAdd: addTask,
+              currentProject: selectedProject
+            }),
+
+            React.createElement(ExportButtons, {
+              tasks: {
+                all: filteredTasks,
+                todo: todoTasks,
+                inprogress: inprogressTasks,
+                done: doneTasks,
+                total: totalTasks,
+                completed: completedTasks
+              }
+            }),
+            loading ?
+              React.createElement('div', { className: 'loading' }, 'Loading tasks...') :
+              React.createElement('div', { className: 'board' },
+                React.createElement(Column, {
+                  title: 'To Do',
+                  status: 'todo',
+                  tasks: todoTasks,
+                  onMove: moveTask,
+                  onDelete: deleteTask,
+                  onEdit: setEditingTask
+                }),
+                React.createElement(Column, {
+                  title: 'In Progress',
+                  status: 'inprogress',
+                  tasks: inprogressTasks,
+                  onMove: moveTask,
+                  onDelete: deleteTask,
+                  onEdit: setEditingTask
+                }),
+                React.createElement(Column, {
+                  title: 'Done',
+                  status: 'done',
+                  tasks: doneTasks,
+                  onMove: moveTask,
+                  onDelete: deleteTask,
+                  onEdit: setEditingTask
+                })
+              ),
+            React.createElement('footer', { className: 'footer' },
+              React.createElement('p', null, 'Total Tasks: ' + totalTasks + ' | Completed: ' + completedTasks)
+            )
+          ),
+          React.createElement(Calendar, { tasks: tasks }),
+          editingTask && React.createElement(EditModal, {
+            task: editingTask,
+            onSave: saveEdit,
+            onCancel: function() { setEditingTask(null); }
+          }),
+          showProjectModal && React.createElement(ProjectModal, {
+            onCreate: addProject,
+            onCancel: function() { setShowProjectModal(false); }
+          })
+        )
+      );
+    }
+
+    // Render the app
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App, null));
+  </script>
+</body>
+</html>
